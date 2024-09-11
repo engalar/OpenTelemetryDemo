@@ -27,6 +27,8 @@ dependencies {
     // OpenTelemetry API and SDK dependencies
     implementation 'io.opentelemetry:opentelemetry-api:1.30.0'
     implementation 'io.opentelemetry:opentelemetry-sdk:1.30.0'
+    implementation 'io.opentelemetry:opentelemetry-exporter-logging:1.30.0'
+
 
     // Exporter for Jaeger (or use Zipkin if preferred)
     implementation 'io.opentelemetry:opentelemetry-exporter-jaeger:1.30.0'

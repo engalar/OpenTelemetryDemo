@@ -6,11 +6,11 @@ package org.example;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.exporter.logging.LoggingSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 
 public class App {
   public String getGreeting() {
@@ -19,20 +19,21 @@ public class App {
 
   public static void main(String[] args) {
     // Configure Jaeger exporter
-    OtlpGrpcSpanExporter jaegerExporter = OtlpGrpcSpanExporter.builder()
-        .setEndpoint("http://127.0.0.1:65106") // Jaeger agent's gRPC endpoint
+    OtlpHttpSpanExporter jaegerExporter = OtlpHttpSpanExporter.builder()
+        .setEndpoint("http://localhost:65107")
         .build();
 
     // Set up the SDK tracer provider
     SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+        .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
         .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
         .build();
 
     // Initialize the OpenTelemetry SDK
-    OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
+    var sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
 
     // Create a tracer
-    Tracer tracer = GlobalOpenTelemetry.getTracer("demo");
+    Tracer tracer = sdk.getTracer("demo");
 
     // Create a span
     Span span = tracer.spanBuilder("my-first-span").startSpan();
@@ -44,5 +45,6 @@ public class App {
     span.end();
 
     System.out.println("Trace has been sent to Jaeger!");
+    tracerProvider.shutdown();
   }
 }
