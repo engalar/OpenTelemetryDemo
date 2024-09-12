@@ -7,37 +7,14 @@ import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+/* import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.sdk.trace.samplers.Sampler; */
 
 public class App {
     public String getGreeting() {
-        return "Hello World!";
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        // 创建 Jaeger Exporter
-        var jaegerExporter = OtlpGrpcSpanExporter.builder()
-                .setEndpoint("http://localhost:4317")
-                .build();
-
-        // 创建 Tracer Provider 并将 Exporter 绑定到它
-        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-                .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
-                .setSampler(Sampler.alwaysOn())
-                .build();
-
-        // 创建全局 OpenTelemetry 实例
-        OpenTelemetrySdk.builder()
-                .setTracerProvider(tracerProvider)
-                .build();
-
-        var msg = new App().getGreeting();
-        System.out.println(msg);
-
         // 获取 Tracer 实例
         Tracer tracer = GlobalOpenTelemetry.getTracer("example-tracer");
 
@@ -46,14 +23,14 @@ public class App {
         try (Scope scope = parentSpan.makeCurrent()) {
             // Do some work
             Thread.sleep(1000);
-            parentSpan.addEvent("some parent event");
+            parentSpan.addEvent("app-parent-event");
 
             // Create a child Span
             Span childSpan = tracer.spanBuilder("child-span").startSpan();
             try (Scope childScope = childSpan.makeCurrent()) {
                 // Do some work
                 Thread.sleep(500);
-                childSpan.addEvent("some child event");
+                childSpan.addEvent("app-child-event");
             } finally {
                 childSpan.end(); // End child span
             }
@@ -62,5 +39,30 @@ public class App {
         } finally {
             parentSpan.end(); // End parent span
         }
+        return "Hello World!";
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        // 创建 Jaeger Exporter
+        /*
+         * var jaegerExporter = OtlpGrpcSpanExporter.builder()
+         * .setEndpoint("http://localhost:4317")
+         * .build();
+         * 
+         * // 创建 Tracer Provider 并将 Exporter 绑定到它
+         * SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+         * .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
+         * .setSampler(Sampler.alwaysOn())
+         * .build();
+         * 
+         * // 创建全局 OpenTelemetry 实例
+         * OpenTelemetrySdk.builder()
+         * .setTracerProvider(tracerProvider)
+         * .build();
+         */
+
+        var msg = new App().getGreeting();
+        System.out.println(msg);
+
     }
 }

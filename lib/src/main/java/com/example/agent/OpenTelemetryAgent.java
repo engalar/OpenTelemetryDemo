@@ -29,8 +29,25 @@ public class OpenTelemetryAgent {
                         // 获取要修改的方法
                         CtMethod method = ctClass.getDeclaredMethod("getGreeting");
 
-                        // 在方法开始处插入代码
-                        method.insertBefore("{ System.out.println(\"[java agent]: getGreeting method is called.\"); }");
+                        method.addLocalVariable("span", classPool.get("io.opentelemetry.api.trace.Span"));
+                        method.addLocalVariable("scope", classPool.get("io.opentelemetry.context.Scope"));
+                        // 在方法开始前插入 OpenTelemetry span
+                        String code = " " +
+                                "   span = io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-span\").spanBuilder(\"doSomething\").startSpan();"+
+                                "scope = span.makeCurrent();"
+                                +
+                                "  try {" +
+                                "      System.out.println(\"OpenTelemetry span started\");span.addEvent(\"agent-event\");" +
+                                "  } catch (Throwable t) {" +
+                                "      span.recordException(t);" +
+                                "      throw t;" +
+                                "  }" +
+                                "";
+                        method.insertBefore(
+                                code);
+
+                        // 在方法结束后插入 span 结束
+                        method.insertAfter("scope.close(); span.end(); System.out.println(\"OpenTelemetry span ended\"); ");
 
                         // 返回修改后的字节码
                         return ctClass.toBytecode();

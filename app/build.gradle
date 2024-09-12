@@ -74,6 +74,8 @@ tasks.withType(JavaExec) {
     jvmArgs = [
         "-javaagent:../opentelemetry-javaagent.jar",
         "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar",
+        // config opentelemetry service name
+        "-Dotel.service.name=my_mendix_app",
         "-Dotel.exporter=jaeger",
         "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
         "-Dotel.traces.sampler=always_on" // 示例：确保追踪数据被采集
