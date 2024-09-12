@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+  mynetwork:
+services:
+  jaeger2:
+    image: jaegertracing/all-in-one:1.60 # 最新的 Jaeger 镜像
+    container_name: jaeger2
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "6831:6831/udp" # UDP for Jaeger agent
+      - "14250:14250" # gRPC for Jaeger agent
+      - "14268:14268" # HTTP for Jaeger collector
+      - "4317:4317" # gRPC server
+      - "4318:4318" # HTTP server
+    environment:
+      COLLECTOR_ZIPKIN_HTTP_PORT: 9411 # 兼容 Zipkin 的 API 端口
+    networks:
+      - mynetwork
+  java-app:
+    networks:
+      - mynetwork
+    image: openjdk:17-jdk-slim # 使用 OpenJDK 17 镜像
+    container_name: java-app
+    ports:
+      - "28080:8080" # 应用程序的端口，修改为你的应用实际端口
+    volumes:
+      - .\app\build\install\app:/app # 将当前目录挂载到容器中
+    working_dir: /app
+    command: ["./bin/app"]
+    environment:
+      OTEL_EXPORTER_JAEGER_ENDPOINT: "http://jaeger2:14250" # 配置 Jaeger 的 gRPC 端点
+      OTEL_SERVICE_NAME: "your-java-app" # 你的 Java 应用名称
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318" # 将 OpenTelemetry 指向 Collector
+    depends_on:
+      - jaeger2
+  # otel-collector:
+  #   image: otel/opentelemetry-collector-contrib:0.108.0
+  #   container_name: otel-collector
+  #   ports:
+  #     - "4317:4317" # gRPC 端口
+  #     - "4318:4318" # HTTP 端口
+  #   command: ["--config=/etc/otel/config.yaml"]
+  #   volumes:
+  #     - ./otel-config.yaml:/etc/otel/config.yaml

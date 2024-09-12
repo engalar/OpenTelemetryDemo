@@ -6,45 +6,58 @@ package org.example;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.logging.LoggingSpanExporter;
-import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 public class App {
   public String getGreeting() {
     return "Hello World!";
   }
 
-  public static void main(String[] args) {
-    // Configure Jaeger exporter
-    OtlpHttpSpanExporter jaegerExporter = OtlpHttpSpanExporter.builder()
-        .setEndpoint("http://localhost:65107")
+  public static void main(String[] args) throws InterruptedException {
+    // 创建 Jaeger Exporter
+    var jaegerExporter = OtlpGrpcSpanExporter.builder()
+        .setEndpoint("http://localhost:4317")
         .build();
 
-    // Set up the SDK tracer provider
+    // 创建 Tracer Provider 并将 Exporter 绑定到它
     SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-        .addSpanProcessor(SimpleSpanProcessor.create(LoggingSpanExporter.create()))
         .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
+        .setSampler(Sampler.alwaysOn())
         .build();
 
-    // Initialize the OpenTelemetry SDK
-    var sdk = OpenTelemetrySdk.builder().setTracerProvider(tracerProvider).buildAndRegisterGlobal();
+    // 创建全局 OpenTelemetry 实例
+    OpenTelemetrySdk.builder()
+        .setTracerProvider(tracerProvider)
+        .build();
 
-    // Create a tracer
-    Tracer tracer = sdk.getTracer("demo");
+    // 获取 Tracer 实例
+    Tracer tracer = GlobalOpenTelemetry.getTracer("example-tracer");
 
-    // Create a span
-    Span span = tracer.spanBuilder("my-first-span").startSpan();
+     // Create a parent Span
+        Span parentSpan = tracer.spanBuilder("parent-span").startSpan();
+        try (Scope scope = parentSpan.makeCurrent()) {
+            // Do some work
+            Thread.sleep(1000);
+            parentSpan.addEvent("some parent event");
 
-    // Simulate work inside the span
-    span.addEvent("Doing some work here");
-
-    // End the span
-    span.end();
-
-    System.out.println("Trace has been sent to Jaeger!");
-    tracerProvider.shutdown();
+            // Create a child Span
+            Span childSpan = tracer.spanBuilder("child-span").startSpan();
+            try (Scope childScope = childSpan.makeCurrent()) {
+                // Do some work
+                Thread.sleep(500);
+                childSpan.addEvent("some child event");
+            } finally {
+                childSpan.end(); // End child span
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            parentSpan.end(); // End parent span
+        }
   }
 }
