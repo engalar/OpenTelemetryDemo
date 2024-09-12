@@ -40,6 +40,8 @@ dependencies {
     // Optional: Slf4j logging binding
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'org.slf4j:slf4j-simple:2.0.9'
+
+    implementation project(':lib')
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -71,6 +73,7 @@ jar {
 tasks.withType(JavaExec) {
     jvmArgs = [
         "-javaagent:../opentelemetry-javaagent.jar",
+        "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar",
         "-Dotel.exporter=jaeger",
         "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
         "-Dotel.traces.sampler=always_on" // 示例：确保追踪数据被采集

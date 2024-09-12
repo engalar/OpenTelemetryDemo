@@ -12,3 +12,4 @@ plugins {
 
 rootProject.name = 'OpenTelemetryDemo'
 include('app')
+include ':lib'

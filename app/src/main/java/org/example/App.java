@@ -14,31 +14,34 @@ import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
 
 public class App {
-  public String getGreeting() {
-    return "Hello World!";
-  }
+    public String getGreeting() {
+        return "Hello World!";
+    }
 
-  public static void main(String[] args) throws InterruptedException {
-    // 创建 Jaeger Exporter
-    var jaegerExporter = OtlpGrpcSpanExporter.builder()
-        .setEndpoint("http://localhost:4317")
-        .build();
+    public static void main(String[] args) throws InterruptedException {
+        // 创建 Jaeger Exporter
+        var jaegerExporter = OtlpGrpcSpanExporter.builder()
+                .setEndpoint("http://localhost:4317")
+                .build();
 
-    // 创建 Tracer Provider 并将 Exporter 绑定到它
-    SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-        .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
-        .setSampler(Sampler.alwaysOn())
-        .build();
+        // 创建 Tracer Provider 并将 Exporter 绑定到它
+        SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
+                .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
+                .setSampler(Sampler.alwaysOn())
+                .build();
 
-    // 创建全局 OpenTelemetry 实例
-    OpenTelemetrySdk.builder()
-        .setTracerProvider(tracerProvider)
-        .build();
+        // 创建全局 OpenTelemetry 实例
+        OpenTelemetrySdk.builder()
+                .setTracerProvider(tracerProvider)
+                .build();
 
-    // 获取 Tracer 实例
-    Tracer tracer = GlobalOpenTelemetry.getTracer("example-tracer");
+        var msg = new App().getGreeting();
+        System.out.println(msg);
 
-     // Create a parent Span
+        // 获取 Tracer 实例
+        Tracer tracer = GlobalOpenTelemetry.getTracer("example-tracer");
+
+        // Create a parent Span
         Span parentSpan = tracer.spanBuilder("parent-span").startSpan();
         try (Scope scope = parentSpan.makeCurrent()) {
             // Do some work
@@ -59,5 +62,5 @@ public class App {
         } finally {
             parentSpan.end(); // End parent span
         }
-  }
+    }
 }
