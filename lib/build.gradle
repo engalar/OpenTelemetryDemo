@@ -10,6 +10,9 @@ dependencies {
 }
 
 jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     manifest {
         attributes(
                 'Premain-Class': 'com.example.agent.OpenTelemetryAgent'

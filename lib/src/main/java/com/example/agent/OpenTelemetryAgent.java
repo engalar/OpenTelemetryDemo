@@ -20,14 +20,14 @@ public class OpenTelemetryAgent {
                     java.security.ProtectionDomain protectionDomain, byte[] classfileBuffer) {
                 String finalClassName = className.replace("/", ".");
 
-                if (finalClassName.equals("org.example.App")) {
+                if (finalClassName.equals("com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl")) {
                     System.out.println("Transforming class: " + finalClassName);
                     try {
                         ClassPool classPool = ClassPool.getDefault();
                         CtClass ctClass = classPool.get(finalClassName);
 
                         // 获取要修改的方法
-                        CtMethod method = ctClass.getDeclaredMethod("getGreeting");
+                        CtMethod method = ctClass.getDeclaredMethod("executeAction");
 
                         method.addLocalVariable("span", classPool.get("io.opentelemetry.api.trace.Span"));
                         method.addLocalVariable("scope", classPool.get("io.opentelemetry.context.Scope"));
