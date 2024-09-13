@@ -29,11 +29,11 @@ public class OpenTelemetryAgent {
                         // 获取要修改的方法
                         CtMethod method = ctClass.getDeclaredMethod("executeAction");
 
-                        method.addLocalVariable("span", classPool.get("io.opentelemetry.api.trace.Span"));
-                        method.addLocalVariable("scope", classPool.get("io.opentelemetry.context.Scope"));
+                        method.addLocalVariable("span", classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Span"));
+                        method.addLocalVariable("scope", classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Scope"));
                         // 在方法开始前插入 OpenTelemetry span
                         String code = " " +
-                                "   span = io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-span\").spanBuilder(\"doSomething\").startSpan();"+
+                                "   span = io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-span\").spanBuilder(\"doSomething\").startSpan();"+
                                 "scope = span.makeCurrent();"
                                 +
                                 "  try {" +
