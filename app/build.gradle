@@ -42,9 +42,11 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
     implementation project(':lib')
+    // https://mvnrepository.com/artifact/io.opentelemetry.javaagent/opentelemetry-javaagent
+    // https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.0.0/opentelemetry-javaagent.jar
+    implementation 'io.opentelemetry.javaagent:opentelemetry-javaagent:2.0.0'
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -52,29 +54,37 @@ java {
 }
 
 application {
-    // Define the main class for the application.
     mainClass = 'org.example.App'
 }
 
 tasks.named('test') {
-    // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
 
 jar {
     manifest {
         attributes(
-            'Main-Class': 'org.example.App'  // 替换为你的主类名称
+            'Main-Class': 'org.example.App'
         )
     }
 }
 
 tasks.withType(JavaExec) {
-    jvmArgs = [
-        "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
-        "-Dotel.service.name=my_procode_app",
-        "-Dotel.exporter=jaeger",
-        "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
-        "-Dotel.traces.sampler=always_on"
-    ]
+    def agentJar = configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.find { 
+            it.moduleVersion.id.group == 'io.opentelemetry.javaagent' && 
+            it.moduleVersion.id.name == 'opentelemetry-javaagent' 
+    }
+
+    if (agentJar != null) {
+        jvmArgs = [
+            "-javaagent:${agentJar.file.absolutePath}",
+            "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
+            "-Dotel.service.name=my_procode_app",
+            "-Dotel.exporter=jaeger",
+            "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
+            "-Dotel.traces.sampler=always_on"
+        ]
+    } else {
+        println "OpenTelemetry Java Agent not found in dependencies."
+    }
 }

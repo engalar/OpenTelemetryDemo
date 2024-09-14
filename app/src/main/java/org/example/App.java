@@ -3,15 +3,11 @@
  */
 package org.example;
 
-import io.opentelemetry.api.GlobalOpenTelemetry;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
-/* import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
-import io.opentelemetry.sdk.OpenTelemetrySdk;
-import io.opentelemetry.sdk.trace.SdkTracerProvider;
-import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
-import io.opentelemetry.sdk.trace.samplers.Sampler; */
+import io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Span;
+import io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Scope;
+
 
 public class App {
     public String getGreeting() {
@@ -43,24 +39,6 @@ public class App {
     }
 
     public static void main(String[] args) throws InterruptedException {
-        // 创建 Jaeger Exporter
-        /*
-         * var jaegerExporter = OtlpGrpcSpanExporter.builder()
-         * .setEndpoint("http://localhost:4317")
-         * .build();
-         * 
-         * // 创建 Tracer Provider 并将 Exporter 绑定到它
-         * SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
-         * .addSpanProcessor(SimpleSpanProcessor.create(jaegerExporter))
-         * .setSampler(Sampler.alwaysOn())
-         * .build();
-         * 
-         * // 创建全局 OpenTelemetry 实例
-         * OpenTelemetrySdk.builder()
-         * .setTracerProvider(tracerProvider)
-         * .build();
-         */
-
         var msg = new App().getGreeting();
         System.out.println(msg);
 
