@@ -25,17 +25,17 @@ dependencies {
     // This dependency is used by the application.
     implementation libs.guava
     // OpenTelemetry API and SDK dependencies
-    implementation platform("io.opentelemetry:opentelemetry-bom:1.34.1")
-    implementation 'io.opentelemetry:opentelemetry-api'
-    implementation 'io.opentelemetry:opentelemetry-sdk'
+    // implementation platform("io.opentelemetry:opentelemetry-bom:1.34.1")
+    // implementation 'io.opentelemetry:opentelemetry-api'
+    // implementation 'io.opentelemetry:opentelemetry-sdk'
     // implementation 'io.opentelemetry:opentelemetry-extension-auto-config'
-    implementation 'io.opentelemetry:opentelemetry-exporter-logging'
+    // implementation 'io.opentelemetry:opentelemetry-exporter-logging'
 
 
     // Exporter for Jaeger (or use Zipkin if preferred)
-    implementation 'io.opentelemetry:opentelemetry-exporter-jaeger'
+    // implementation 'io.opentelemetry:opentelemetry-exporter-jaeger'
     // OTLP gRPC Exporter
-    implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
+    // implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
 
     // Optional: Slf4j logging binding
     implementation 'org.slf4j:slf4j-api:2.0.9'
