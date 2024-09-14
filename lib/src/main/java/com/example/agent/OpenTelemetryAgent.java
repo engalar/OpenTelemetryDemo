@@ -2,6 +2,9 @@ package com.example.agent;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -11,7 +14,18 @@ public class OpenTelemetryAgent {
 
     // premain 方法会在 JVM 启动时调用
     public static void premain(String agentArgs, Instrumentation inst) {
-        System.out.println("OpenTelemetry Agent loaded.");
+        // 解析参数
+        Pattern pattern = Pattern.compile("([a-zA-Z\\.]+)#([a-zA-Z]+)");
+        Matcher matcher = pattern.matcher(agentArgs);
+
+        // matcher map to list
+        var matcherList = new ArrayList<String[]>();
+
+        while (matcher.find()) {
+            matcherList.add(new String[]{matcher.group(1), matcher.group(2)});
+        }
+
+        System.out.println("OpenTelemetry Agent loaded." );
 
         // 注册字节码转换器
         inst.addTransformer(new ClassFileTransformer() {
@@ -20,24 +34,28 @@ public class OpenTelemetryAgent {
                     java.security.ProtectionDomain protectionDomain, byte[] classfileBuffer) {
                 String finalClassName = className.replace("/", ".");
 
-                if (finalClassName.equals("com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl")) {
+                var matcherItem = matcherList.stream().filter(matcher -> matcher[0].equals(finalClassName)).findFirst();
+                if (matcherItem.isPresent()) {
                     System.out.println("Transforming class: " + finalClassName);
                     try {
                         ClassPool classPool = ClassPool.getDefault();
                         CtClass ctClass = classPool.get(finalClassName);
 
-                        // 获取要修改的方法
-                        CtMethod method = ctClass.getDeclaredMethod("executeAction");
+                        CtMethod method = ctClass.getDeclaredMethod(matcherItem.get()[1]);
 
-                        method.addLocalVariable("span", classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Span"));
-                        method.addLocalVariable("scope", classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Scope"));
-                        // 在方法开始前插入 OpenTelemetry span
+                        method.addLocalVariable("span",
+                                classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.api.trace.Span"));
+                        method.addLocalVariable("scope",
+                                classPool.get("io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Scope"));
+
                         String code = " " +
-                                "   span = io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-span\").spanBuilder(\"doSomething\").startSpan();"+
+                                "   span = io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-tracer\").spanBuilder(\"span_in_agent\").startSpan();"
+                                +
                                 "scope = span.makeCurrent();"
                                 +
                                 "  try {" +
-                                "      System.out.println(\"OpenTelemetry span started\");span.addEvent(\"agent-event\");" +
+                                "      System.out.println(\"OpenTelemetry agent span started\");span.addEvent(\"agent-event\");"
+                                +
                                 "  } catch (Throwable t) {" +
                                 "      span.recordException(t);" +
                                 "      throw t;" +
@@ -46,16 +64,16 @@ public class OpenTelemetryAgent {
                         method.insertBefore(
                                 code);
 
-                        // 在方法结束后插入 span 结束
-                        method.insertAfter("scope.close(); span.end(); System.out.println(\"OpenTelemetry span ended\"); ");
+                        method.insertAfter(
+                                "scope.close(); span.end(); System.out.println(\"OpenTelemetry span ended\"); ");
 
-                        // 返回修改后的字节码
                         return ctClass.toBytecode();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
-                return classfileBuffer; // 返回原始字节码
+
+                return classfileBuffer;
             }
         }, false);
     }

@@ -61,7 +61,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.0.0/opentelemetry-javaagent.jar
 jar {
     manifest {
         attributes(
@@ -72,12 +71,10 @@ jar {
 
 tasks.withType(JavaExec) {
     jvmArgs = [
-        "-javaagent:../opentelemetry-javaagent.jar",
-        "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar",
-        // config opentelemetry service name
-        "-Dotel.service.name=my_mendix_app",
+        "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
+        "-Dotel.service.name=my_procode_app",
         "-Dotel.exporter=jaeger",
         "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
-        "-Dotel.traces.sampler=always_on" // 示例：确保追踪数据被采集
+        "-Dotel.traces.sampler=always_on"
     ]
 }

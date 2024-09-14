@@ -7,6 +7,10 @@ version = '1.0-SNAPSHOT'
 
 dependencies {
     implementation 'org.javassist:javassist:3.28.0-GA'
+    // https://mvnrepository.com/artifact/io.opentelemetry.javaagent/opentelemetry-javaagent
+    // https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.0.0/opentelemetry-javaagent.jar
+    implementation 'io.opentelemetry.javaagent:opentelemetry-javaagent:2.0.0'
+
 }
 
 jar {
