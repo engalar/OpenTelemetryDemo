@@ -1,4 +1,4 @@
-package com.example.agent;
+package com.wengao.mendix.agent;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;

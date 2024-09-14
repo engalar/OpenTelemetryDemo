@@ -41,7 +41,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'org.slf4j:slf4j-simple:2.0.9'
 
-    implementation project(':lib')
+    implementation project(':mendix-agent')
     // https://mvnrepository.com/artifact/io.opentelemetry.javaagent/opentelemetry-javaagent
     // https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.0.0/opentelemetry-javaagent.jar
     implementation 'io.opentelemetry.javaagent:opentelemetry-javaagent:2.0.0'
@@ -78,7 +78,7 @@ tasks.withType(JavaExec) {
     if (agentJar != null) {
         jvmArgs = [
             "-javaagent:${agentJar.file.absolutePath}",
-            "-javaagent:../lib/build/libs/lib-1.0-SNAPSHOT.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
+            "-javaagent:../mendix-agent/build/libs/mendix-agent-1.0.0.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
             "-Dotel.service.name=my_procode_app",
             "-Dotel.exporter=jaeger",
             "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",
