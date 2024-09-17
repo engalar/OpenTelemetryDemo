@@ -7,8 +7,6 @@ version = '1.0.0'
 
 dependencies {
     implementation 'org.javassist:javassist:3.28.0-GA'
-    
-
 }
 
 jar {
@@ -17,4 +15,17 @@ jar {
                 'Premain-Class': 'com.wengao.mendix.agent.OpenTelemetryAgent'
         )
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.debug = true   // 启用调试信息
+    options.debugOptions.debugLevel = 'source,lines,vars'  // 包括源码、行号和变量信息
+}
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    archiveClassifier.set('sources')
+}
+
+artifacts {
+    archives sourcesJar
 }
