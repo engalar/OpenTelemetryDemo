@@ -17,34 +17,20 @@ repositories {
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation libs.junit.jupiter
-
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
-    // This dependency is used by the application.
-    implementation libs.guava
-    // OpenTelemetry API and SDK dependencies
-    // implementation platform("io.opentelemetry:opentelemetry-bom:1.34.1")
-    // implementation 'io.opentelemetry:opentelemetry-api'
-    // implementation 'io.opentelemetry:opentelemetry-sdk'
-    // implementation 'io.opentelemetry:opentelemetry-extension-auto-config'
-    // implementation 'io.opentelemetry:opentelemetry-exporter-logging'
-
-
-    // Exporter for Jaeger (or use Zipkin if preferred)
-    // implementation 'io.opentelemetry:opentelemetry-exporter-jaeger'
-    // OTLP gRPC Exporter
-    // implementation 'io.opentelemetry:opentelemetry-exporter-otlp'
-
-    // Optional: Slf4j logging binding
-    implementation 'org.slf4j:slf4j-api:2.0.9'
-    implementation 'org.slf4j:slf4j-simple:2.0.9'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
 
     implementation project(':mendix-agent')
     // https://mvnrepository.com/artifact/io.opentelemetry.javaagent/opentelemetry-javaagent
     // https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.0.0/opentelemetry-javaagent.jar
     implementation 'io.opentelemetry.javaagent:opentelemetry-javaagent:2.0.0'
+    configurations {
+        implementation {
+            // 下载源码
+            transitive = true
+        }
+    }
 }
 
 java {
@@ -78,7 +64,7 @@ tasks.withType(JavaExec) {
     if (agentJar != null) {
         jvmArgs = [
             "-javaagent:${agentJar.file.absolutePath}",
-            "-javaagent:../mendix-agent/build/libs/mendix-agent-1.0.0.jar=com.mendix.modules.microflowengine.microflow.impl.MicroflowImpl#executeAction,org.example.App#getGreeting",
+            "-javaagent:../mendix-agent/build/libs/mendix-agent-1.0.0.jar=org.example.App#getGreeting",
             "-Dotel.service.name=my_procode_app",
             "-Dotel.exporter=jaeger",
             "-Dotel.exporter.jaeger.endpoint=http://localhost:14268/api/traces",

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
 	<name>mendix-agent</name>
-	<comment>Project lib created by Buildship.</comment>
+	<comment>Project mendix-agent created by Buildship.</comment>
 	<projects>
 	</projects>
 	<buildSpec>
@@ -22,7 +22,7 @@
 	</natures>
 	<filteredResources>
 		<filter>
-			<id>1726237880157</id>
+			<id>1726576068806</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
