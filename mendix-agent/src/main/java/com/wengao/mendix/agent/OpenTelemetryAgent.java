@@ -77,13 +77,13 @@ public class OpenTelemetryAgent {
 
                     String code = " " +
                             "action = getContext().getActionStack().get(0); " +
-                            "actionName = action != null ? action.getActionName() : \"root span\";"+
+                            "actionName = action != null ? \"ActionName[\" + action.getActionName() + \"]\" : \"root span\";"+
                             "   __span = io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-tracer\").spanBuilder(actionName).setParent(io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Context.current()).startSpan();"
                             +
                             "__scope = __span.makeCurrent();"
                             +
                             "  try {" +
-                            "      System.out.println(\"OpenTelemetry agent span started\");__span.addEvent(\"agent-event\");"
+                            "      __span.addEvent(\"agent-event\");"
                             +
                             "  } catch (Throwable t) {" +
                             "      __span.recordException(t);" +
