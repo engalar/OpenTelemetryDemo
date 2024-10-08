@@ -76,7 +76,7 @@ public class OpenTelemetryAgent {
                     }
 
                     String code = " " +
-                            "action = getContext().getActionStack().get(0); " +
+                            "action = getContext().getActionStack().elementAt(getContext().getActionStack().size() - 1>0 ? getContext().getActionStack().size() - 1 : 0); " +
                             "actionName = action != null ? \"ActionName[\" + action.getActionName() + \"]\" : \"root span\";"+
                             "   __span = io.opentelemetry.javaagent.shaded.io.opentelemetry.api.GlobalOpenTelemetry.getTracer(\"my-agent-tracer\").spanBuilder(actionName).setParent(io.opentelemetry.javaagent.shaded.io.opentelemetry.context.Context.current()).startSpan();"
                             +
