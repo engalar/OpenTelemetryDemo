@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'jaeger'
+    static_configs:
+      - targets: ['jaeger2:14268']  # Jaeger 的 HTTP 收集器指标
+
+  - job_name: 'my_application'
+    metrics_path: '/prometheus'    # 指定抓取的 metrics 路径
+    static_configs:
+      - targets: ['172.31.80.1:8090']  # 从 http://172.31.80.1:8090 收集数据
